@@ -1,2 +1,3 @@
-flask
-requests
+llama3
+evolutionapi
+python-dotenv

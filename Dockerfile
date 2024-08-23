@@ -1,18 +1,16 @@
-# Use uma imagem base oficial do Python
+# Use uma imagem base do Python
 FROM python:3.12.5-slim
 
-# Defina o diretório de trabalho
+# Copie o arquivo requirements.txt para o container
+COPY requirements.txt /app/requirements.txt
+
+# Instale as dependências necessárias
+RUN pip install --upgrade pip
+RUN pip install -r /app/requirements.txt
+
+# Copie o código e o arquivo .env para o container
+COPY . /app
 WORKDIR /app
 
-# Copie o arquivo requirements.txt e instale as dependências
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copie o código da aplicação
-COPY . .
-
-# Exponha a porta que a aplicação irá rodar
-EXPOSE 5000
-
-# Comando para rodar a aplicação
+# Comando para iniciar a aplicação
 CMD ["python", "app.py"]

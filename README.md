@@ -14,13 +14,13 @@ Este projeto implementa um chatbot de WhatsApp integrado a uma API de LLM (Large
 - Flask
 - Docker
 - API do Evolution
-- API do GPT-J (EleutherAI)
+- API do Llama3
 
 ## Pré-requisitos
 
 - Python 3.9 ou superior
 - Conta no Evolution API
-- Chave de API do GPT-J (EleutherAI)
+- Chave de API Llama3
 - Docker
 
 ## Instalação
@@ -32,12 +32,7 @@ Este projeto implementa um chatbot de WhatsApp integrado a uma API de LLM (Large
     cd whatsapp-chatbot-vai-volta
     ```
 
-2. Crie um arquivo `.env` no diretório raiz do projeto com as seguintes variáveis de ambiente:
-
-    ```plaintext
-    EVOLUTION_API_TOKEN=your_evolution_api_token
-    GPT_J_API_KEY=your_gpt_j_api_key
-    ```
+2. Renomeie o arquivo `.env.example` para `.env` e altere os dados conforme seu ambiente
 
 3. Construa a imagem Docker:
 
@@ -45,10 +40,10 @@ Este projeto implementa um chatbot de WhatsApp integrado a uma API de LLM (Large
     docker build -t whatsapp-chatbot .
     ```
 
-4. Rode o container Docker, passando o arquivo `.env`:
+4. Rode o container Docker:
 
     ```bash
-    docker run -d -p 5000:5000 --env-file .env whatsapp-chatbot
+    docker run -d -p 5000:5000 whatsapp-chatbot
     ```
 
 ## Uso

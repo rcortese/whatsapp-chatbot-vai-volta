@@ -1,54 +1,28 @@
-from flask import Flask, request, jsonify
-import requests
 import os
+from dotenv import load_dotenv
+from evolutionapi import EvolutionAPI
+from llama3 import Llama3
 
-app = Flask(__name__)
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
-# Configurações das APIs usando variáveis de ambiente
-GPT_J_API_URL = os.getenv('GPT_J_API_URL')
-GPT_J_API_KEY = os.getenv('GPT_J_API_KEY')
-EVOLUTION_API_URL = os.getenv('EVOLUTION_API_URL')
-EVOLUTION_API_TOKEN = os.getenv('EVOLUTION_API_TOKEN')
+# Inicialize o modelo Llama3 usando a API
+llama3_api_url = os.getenv('LLAMA3_API_URL')
+llama3_api_token = os.getenv('LLAMA3_API_TOKEN')
+llama3_model = Llama3(api_url=llama3_api_url, api_token=llama3_api_token)
 
-# Função para obter resposta do GPT-J
-def get_gpt_j_response(prompt):
-    headers = {
-        'Authorization': f'Bearer {GPT_J_API_KEY}',
-        'Content-Type': 'application/json'
-    }
-    data = {
-        'prompt': prompt,
-        'max_tokens': 150
-    }
-    response = requests.post(GPT_J_API_URL, headers=headers, json=data)
-    return response.json()['choices'][0]['text'].strip()
+# Inicialize a EvolutionAPI
+evolution_api = EvolutionAPI(api_key=os.getenv('EVOLUTION_API_TOKEN'), base_url=os.getenv('EVOLUTION_API_URL'))
 
-# Função para enviar mensagem pelo Evolution API
-def send_evolution_message(to, message):
-    headers = {
-        'Authorization': f'Bearer {EVOLUTION_API_TOKEN}',
-        'Content-Type': 'application/json'
-    }
-    data = {
-        'jid': to,
-        'message': message
-    }
-    response = requests.post(EVOLUTION_API_URL, headers=headers, json=data)
-    return response.json()
+def handle_message(message):
+    response = llama3_model.generate_response(message)
+    return response
 
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    incoming_message = request.json
-    message_text = incoming_message['message']['text']
-    sender = incoming_message['message']['from']
+# Configurar o webhook do WhatsApp
+@evolution_api.on_message
+def on_message(message):
+    response = handle_message(message.text)
+    evolution_api.send_message(message.from_, response)
 
-    # Processa a mensagem recebida e obtém a resposta do GPT-J
-    gpt_j_response = get_gpt_j_response(message_text)
-
-    # Envia a resposta pelo Evolution API
-    send_evolution_message(sender, gpt_j_response)
-
-    return jsonify({'status': 'success', 'response': gpt_j_response})
-
-if __name__ == '__main__':
-    app.run(port=5000)
+if __name__ == "__main__":
+    evolution_api.run(port=5000)
